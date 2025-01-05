@@ -43,7 +43,7 @@ export default function Home() {
 
   const getUserDetails = async (accessToken) => {
     const response = await fetch(
-      "http://localhost:8080/identity/users/my-info",
+      "http://localhost:8088/users/myInfo",
       {
         method: "GET",
         headers: {
@@ -54,7 +54,7 @@ export default function Home() {
 
     const data = await response.json();
 
-    console.log(data.result);
+    // console.log(data.result);
 
     setUserDetails(data.result);
   };
@@ -66,7 +66,7 @@ export default function Home() {
       password: password,
     };
 
-    fetch("http://localhost:8080/identity/users/create-password", {
+    fetch("http://localhost:8088/users/set-password", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -78,7 +78,7 @@ export default function Home() {
         return response.json();
       })
       .then((data) => {
-        if (data.code != 1000) throw new Error(data.message);
+        if (data.code !== 1000) throw new Error(data.message);
 
         getUserDetails(getToken());
         showSuccess(data.message);
@@ -143,17 +143,19 @@ export default function Home() {
               }}
             >
               <p>Welcome back to Devteria, {userDetails.username}</p>
-              <h1 className="name">{`${userDetails.firstName} ${userDetails.lastName}`}</h1>
-              <p className="email">{userDetails.dob}</p>
+              <h1 className="name">{userDetails.fullName}</h1>
+              <p className="email">{userDetails.email}</p>
+              <p className="phone">{userDetails.phone}</p>
+              <p className="dob">{userDetails.dob}</p>
               <ul>
                 User's roles:
                 {userDetails.roles?.map((item, index) => (
-                  <li className="email" key={index}>
-                    {item.name}
+                  <li className="role" key={index}>
+                    {item}
                   </li>
                 ))}
               </ul>
-              {userDetails.noPassword && (
+              {!userDetails.hasPassword && (
                 <Box
                   component="form"
                   onSubmit={addPassword}

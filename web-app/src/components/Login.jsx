@@ -11,6 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 
+import FacebookIcon from "@mui/icons-material/Facebook";
 import GoogleIcon from "@mui/icons-material/Google";
 import { OAuthConfig } from "../configurations/configuration";
 import { useEffect, useState } from "react";
@@ -20,16 +21,36 @@ import { getToken, setToken } from "../services/localStorageService";
 export default function Login() {
   const navigate = useNavigate();
 
+  const handleContinueWithFacebook = () => {
+    const callbackUrl = OAuthConfig.redirectUri;
+    const facebookAuthUrl = OAuthConfig.authUri_facebook;
+    const facebookClientId = OAuthConfig.clientId_facebook;
+
+    // Lưu provider vào localStorage
+    localStorage.setItem("oauth_provider", "facebook");
+
+    const targetUrl = `${facebookAuthUrl}?redirect_uri=${encodeURIComponent(
+      callbackUrl
+    )}&response_type=code&client_id=${facebookClientId}&scope=email%20public_profile`;
+
+    // console.log(targetUrl);
+
+    window.location.href = targetUrl;
+  };
+
   const handleContinueWithGoogle = () => {
     const callbackUrl = OAuthConfig.redirectUri;
-    const authUrl = OAuthConfig.authUri;
-    const googleClientId = OAuthConfig.clientId;
+    const googleAuthUrl = OAuthConfig.authUri_google;
+    const googleClientId = OAuthConfig.clientId_google;
 
-    const targetUrl = `${authUrl}?redirect_uri=${encodeURIComponent(
+    // Lưu provider vào localStorage
+    localStorage.setItem("oauth_provider", "google");
+
+    const targetUrl = `${googleAuthUrl}?redirect_uri=${encodeURIComponent(
       callbackUrl
     )}&response_type=code&client_id=${googleClientId}&scope=openid%20email%20profile`;
 
-    console.log(targetUrl);
+    // console.log(targetUrl);
 
     window.location.href = targetUrl;
   };
@@ -76,7 +97,7 @@ export default function Login() {
       password: password,
     };
 
-    fetch(`http://localhost:8080/identity/auth/token`, {
+    fetch(`http://localhost:8088/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -87,7 +108,7 @@ export default function Login() {
         return response.json();
       })
       .then((data) => {
-        console.log(data);
+        // console.log(data);
 
         if (data.code !== 1000) throw new Error(data.message);
 
@@ -162,7 +183,7 @@ export default function Login() {
               <Button
                 type="submit"
                 variant="contained"
-                color="primary"
+                color="success"
                 size="large"
                 onClick={handleLogin}
                 fullWidth
@@ -172,7 +193,19 @@ export default function Login() {
               <Button
                 type="button"
                 variant="contained"
-                color="secondary"
+                color="primary"
+                size="large"
+                onClick={handleContinueWithFacebook}
+                fullWidth
+                sx={{ gap: "10px" }}
+              >
+                <FacebookIcon />
+                Continue with Facebook
+              </Button>
+              <Button
+                type="button"
+                variant="contained"
+                color="error"
                 size="large"
                 onClick={handleContinueWithGoogle}
                 fullWidth

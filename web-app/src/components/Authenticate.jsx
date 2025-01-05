@@ -8,16 +8,19 @@ export default function Authenticate() {
   const [isLoggedin, setIsLoggedin] = useState(false);
 
   useEffect(() => {
-    console.log(window.location.href);
+    // console.log(window.location.href);
 
-    const authCodeRegex = /code=([^&]+)/;
+    const authCodeRegex = /code=([^&#]+)/;
     const isMatch = window.location.href.match(authCodeRegex);
+    const provider = localStorage.getItem("oauth_provider");
 
     if (isMatch) {
       const authCode = isMatch[1];
 
+      console.log(authCode);
+
       fetch(
-        `http://localhost:8080/identity/auth/outbound/authentication?code=${authCode}`,
+        `http://localhost:8088/auth/outbound/authentication?provider=${provider}&code=${authCode}`,
         {
           method: "POST",
         }
@@ -26,10 +29,12 @@ export default function Authenticate() {
           return response.json();
         })
         .then((data) => {
-          console.log(data);
+          // console.log(data);
 
           setToken(data.result?.token);
           setIsLoggedin(true);
+
+          localStorage.removeItem("oauth_provider");
         });
     }
   }, []);
